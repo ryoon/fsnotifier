@@ -526,8 +526,14 @@ static void inotify_callback(const char* path, int event) {
 static void report_event(const char* event, const char* path) {
   userlog(LOG_DEBUG, "%s: %s", event, path);
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+#endif
   char* copy = path, *p;
   for (p = copy; *p != '\0'; ++p) {
     if (*p == '\n') {
@@ -538,7 +544,11 @@ static void report_event(const char* event, const char* path) {
       *p = '\0';
     }
   }
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
   fputs(event, stdout);
   fputc('\n', stdout);
